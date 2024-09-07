@@ -23,7 +23,7 @@ COPY requirements.txt .
 RUN pip install --upgrade pip
 RUN pip install dlib -vvv
 RUN pip install cmake 
-RUN pip install -r requirements.txt
+RUN pip install face_recognition
 
 # Stage 2: Runner
 FROM python:3-alpine AS runner
