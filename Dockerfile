@@ -21,7 +21,8 @@ ENV PATH="$VIRTUAL_ENV/bin:$PATH"
 # Install Python dependencies
 COPY requirements.txt .
 RUN pip install --upgrade pip
-RUN pip install cmake dlib
+RUN pip install dlib -vvv
+RUN pip install cmake 
 RUN pip install -r requirements.txt
 
 # Stage 2: Runner
