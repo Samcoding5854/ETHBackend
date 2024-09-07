@@ -1,2 +1,3 @@
+dlib -vvv
 face_recognition
 fastapi[all]
