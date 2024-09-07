@@ -1,7 +1,12 @@
-# Use a base image that fits your project (like Ubuntu, Python, etc.)
-FROM ubuntu:20.04
 
-# Install system dependencies
+FROM python:3-alpine AS builder
+ 
+WORKDIR /app
+ 
+RUN python3 -m venv venv
+ENV VIRTUAL_ENV=/app/venv
+ENV PATH="$VIRTUAL_ENV/bin:$PATH"
+
 RUN apt-get update && apt-get install -y \
     build-essential \
     cmake \
@@ -15,16 +20,21 @@ RUN apt-get update && apt-get install -y \
 RUN pip install cmake
 RUN pip install dlib
 
-# Copy your application code
-COPY . /app
-
-# Set the working directory
-WORKDIR /app
-
+ 
+COPY requirements.txt .
 RUN pip install -r requirements.txt
-
-
-# Add any additional commands (e.g., installing Python dependencies, etc.)
-
-# Specify the command to run your app (modify as needed)
-CMD ["uvicorn app:app --reload"]
+ 
+# Stage 2
+FROM python:3-alpine AS runner
+ 
+WORKDIR /app
+ 
+COPY --from=builder /app/venv venv
+COPY main.py main.py
+ 
+ENV VIRTUAL_ENV=/app/venv
+ENV PATH="$VIRTUAL_ENV/bin:$PATH"
+ 
+EXPOSE 8000
+ 
+CMD [ "uvicorn", "--host", "0.0.0.0", "app:app" ]
