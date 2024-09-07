@@ -30,8 +30,8 @@ async def compare_faces(urls: ImageURLs):
         match = is_face_match(file1_path, file2_path)
 
         # Clean up the saved files
-        os.remove(file1_path)
-        os.remove(file2_path)
+        # os.remove(file1_path)
+        # os.remove(file2_path)
 
         # Return the result
         return {"match": match}
