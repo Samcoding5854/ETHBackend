@@ -1,40 +1,44 @@
-
+# Stage 1: Builder
 FROM python:3-alpine AS builder
- 
+
+# Install build dependencies
+RUN apk add --no-cache \
+    build-base \
+    cmake \
+    openblas-dev \
+    lapack-dev \
+    libx11-dev \
+    gtk+3.0-dev \
+    python3-dev
+
 WORKDIR /app
- 
+
+# Set up a virtual environment
 RUN python3 -m venv venv
 ENV VIRTUAL_ENV=/app/venv
 ENV PATH="$VIRTUAL_ENV/bin:$PATH"
 
-RUN apt-get update && apt-get install -y \
-    build-essential \
-    cmake \
-    libopenblas-dev \
-    liblapack-dev \
-    libx11-dev \
-    libgtk-3-dev \
-    && rm -rf /var/lib/apt/lists/*
-    
-
-RUN pip install cmake
-RUN pip install dlib
-
- 
+# Install Python dependencies
 COPY requirements.txt .
+RUN pip install --upgrade pip
+RUN pip install cmake dlib
 RUN pip install -r requirements.txt
- 
-# Stage 2
+
+# Stage 2: Runner
 FROM python:3-alpine AS runner
- 
+
 WORKDIR /app
- 
+
+# Copy the virtual environment from the builder stage
 COPY --from=builder /app/venv venv
 COPY main.py main.py
- 
+
+# Set up the virtual environment for the runner stage
 ENV VIRTUAL_ENV=/app/venv
 ENV PATH="$VIRTUAL_ENV/bin:$PATH"
- 
+
+# Expose the necessary port
 EXPOSE 8000
- 
-CMD [ "uvicorn", "--host", "0.0.0.0", "app:app" ]
+
+# Start the application
+CMD [ "uvicorn", "--host", "0.0.0.0", "--port", "8000", "app:app" ]
